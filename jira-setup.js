@@ -1,3 +1,9 @@
+try {
+  process.loadEnvFile();
+} catch (_error) {
+  // .env is optional when Jira vars are exported in the shell.
+}
+
 const BASE_URL = (process.env.JIRA_BASE_URL || '').replace(/\/$/, '');
 const EMAIL = process.env.JIRA_EMAIL;
 const TOKEN = process.env.JIRA_API_TOKEN;
