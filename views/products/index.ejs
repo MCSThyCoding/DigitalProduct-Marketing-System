@@ -1,0 +1,63 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Marketplace</p>
+    <h1>Browse products</h1>
+    <p class="muted">Discover ready-to-use digital downloads from creators.</p>
+  </div>
+  <% if (user && user.role === 'creator') { %>
+    <a class="button primary" href="/creator/products/new">Upload product</a>
+  <% } %>
+</section>
+
+<form class="filters" method="GET" action="/products">
+  <label class="search-box">
+    <span>Search</span>
+    <input type="search" name="q" value="<%= filters.q %>" placeholder="Title, description, or creator">
+  </label>
+  <label>
+    <span>Category</span>
+    <select name="category">
+      <option value="All" <%= filters.category === 'All' ? 'selected' : '' %>>All</option>
+      <% categories.forEach(function(category) { %>
+        <option value="<%= category %>" <%= filters.category === category ? 'selected' : '' %>><%= category %></option>
+      <% }); %>
+    </select>
+  </label>
+  <button class="button secondary" type="submit">Filter</button>
+  <a class="button ghost" href="/products">Reset</a>
+</form>
+
+<% if (products.length === 0) { %>
+  <div class="empty-state">
+    <h2>No products found</h2>
+    <p>Try a different search term or category.</p>
+  </div>
+<% } else { %>
+  <section class="product-grid">
+    <% products.forEach(function(product) { %>
+      <article class="product-card">
+        <div class="product-card-top">
+          <span class="product-icon"><%= categoryIcon(product.category) %></span>
+          <span class="badge"><%= product.category %></span>
+        </div>
+        <h2><a href="/products/<%= product.id %>"><%= product.title %></a></h2>
+        <p class="muted">by <%= product.creator_name %></p>
+        <p class="card-description"><%= product.description.length > 110 ? product.description.slice(0, 110) + '…' : product.description %></p>
+        <div class="product-meta">
+          <span class="rating"><%= product.avg_rating ? '★'.repeat(Math.round(product.avg_rating)) + '☆'.repeat(5 - Math.round(product.avg_rating)) : 'New' %></span>
+          <span><%= product.review_count %> reviews</span>
+          <span><%= product.sales_count %> sold</span>
+        </div>
+        <div class="product-card-footer">
+          <strong><%= formatMoney(product.price_cents) %></strong>
+          <a class="button primary small" href="/products/<%= product.id %>">View</a>
+        </div>
+      </article>
+    <% }); %>
+  </section>
+<% } %>
+
+<%- include('../partials/footer') %>

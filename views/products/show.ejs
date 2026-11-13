@@ -1,0 +1,105 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<%
+  function stars(rating) {
+    const value = Math.max(0, Math.min(5, Number(rating) || 0));
+    return '★'.repeat(value) + '☆'.repeat(5 - value);
+  }
+%>
+
+<section class="product-detail">
+  <div class="detail-main">
+    <p class="eyebrow"><%= product.category %> · by <%= product.creator_name %></p>
+    <h1><%= product.title %></h1>
+    <% if (product.status !== 'live') { %>
+      <span class="badge warning"><%= product.status %></span>
+    <% } %>
+    <p class="lede"><%= product.description %></p>
+
+    <div class="detail-stats">
+      <span class="rating large"><%= stars(product.avg_rating) %></span>
+      <span><%= product.review_count %> reviews</span>
+      <span><%= product.sales_count %> sold</span>
+    </div>
+
+    <section class="panel" id="included">
+      <h2>What is included</h2>
+      <ul class="included-list">
+        <li><%= fileIcon(product.original_filename) %> <%= product.original_filename %></li>
+        <li>Instant download after purchase</li>
+        <li>Secure file delivery through your library</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="reviews">
+      <div class="section-heading">
+        <h2>Reviews</h2>
+        <span class="muted"><%= product.review_count %> total</span>
+      </div>
+
+      <% if (reviews.length === 0) { %>
+        <p class="muted">No reviews yet. Purchased buyers can be the first to review.</p>
+      <% } else { %>
+        <div class="review-list">
+          <% reviews.forEach(function(review) { %>
+            <article class="review">
+              <div class="review-head">
+                <strong><%= review.user_name %></strong>
+                <span class="rating"><%= stars(review.rating) %></span>
+                <span class="muted"><%= formatDate(review.created_at) %></span>
+              </div>
+              <p><%= review.comment || 'No written comment.' %></p>
+            </article>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <% if (user && user.role === 'buyer') { %>
+        <% if (purchased) { %>
+          <form class="review-form" method="POST" action="/products/<%= product.id %>/reviews">
+            <h3><%= userReview ? 'Update your review' : 'Write a review' %></h3>
+            <label>Rating
+              <select name="rating" required>
+                <% for (let i = 5; i >= 1; i--) { %>
+                  <option value="<%= i %>" <%= userReview && Number(userReview.rating) === i ? 'selected' : '' %>><%= i %> star<%= i === 1 ? '' : 's' %></option>
+                <% } %>
+              </select>
+            </label>
+            <label>Comment
+              <textarea name="comment" rows="3" maxlength="1000" placeholder="Share what you liked"><%= userReview ? userReview.comment : '' %></textarea>
+            </label>
+            <button class="button primary" type="submit">Submit review</button>
+          </form>
+        <% } else { %>
+          <p class="muted">Purchase this product to leave a review.</p>
+        <% } %>
+      <% } %>
+    </section>
+  </div>
+
+  <aside class="order-card">
+    <div class="order-price"><%= formatMoney(product.price_cents) %></div>
+    <p class="muted">Format: <%= product.original_filename.split('.').pop().toUpperCase() %> · Instant download after purchase</p>
+
+    <% if (user && user.role === 'buyer' && product.status === 'live') { %>
+      <% if (purchased) { %>
+        <a class="button primary full" href="/library">Download from My Library</a>
+      <% } else { %>
+        <a class="button primary full" href="/products/<%= product.id %>/checkout">Buy now</a>
+      <% } %>
+    <% } else if (product.status !== 'live') { %>
+      <button class="button secondary full" disabled>Not available yet</button>
+    <% } else { %>
+      <p class="muted">Only buyer accounts can purchase products.</p>
+    <% } %>
+
+    <dl class="mini-summary">
+      <div><dt>Creator</dt><dd><%= product.creator_name %></dd></div>
+      <div><dt>Category</dt><dd><%= product.category %></dd></div>
+      <div><dt>File size</dt><dd><%= (product.file_size / 1024).toFixed(1) %> KB</dd></div>
+    </dl>
+  </aside>
+</section>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting to payment provider</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="container page">
+    <section class="empty-state">
+      <h1>Redirecting to ABA PayWay…</h1>
+      <p>If you are not redirected automatically, use the button below.</p>
+      <form id="payment-form" method="POST" action="<%= action %>" enctype="multipart/form-data">
+        <% Object.keys(fields).forEach(function(key) { %>
+          <input type="hidden" name="<%= key %>" value="<%= fields[key] %>">
+        <% }); %>
+        <button class="button primary" type="submit">Continue to payment</button>
+      </form>
+    </section>
+  </main>
+  <script>document.getElementById('payment-form').submit();</script>
+</body>
+</html>

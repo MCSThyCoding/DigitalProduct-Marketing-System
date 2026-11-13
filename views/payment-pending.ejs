@@ -1,0 +1,32 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="checkout-layout single">
+  <div>
+    <p class="eyebrow">Manual payment</p>
+    <h1>Payment request pending</h1>
+    <p class="muted">Your cash/manual payment request was submitted. An admin must confirm the payment before your download is released.</p>
+
+    <section class="panel">
+      <h2>Payment request</h2>
+      <dl class="summary-list">
+        <div><dt>Product</dt><dd><%= product ? product.title : `Product #${checkout.product_id}` %></dd></div>
+        <div><dt>Amount</dt><dd><%= formatMoney(checkout.total_cents) %></dd></div>
+        <div><dt>Method</dt><dd>Cash / manual payment</dd></div>
+        <div><dt>Status</dt><dd>Pending admin confirmation</dd></div>
+        <div><dt>Reference</dt><dd><%= checkout.provider_ref || checkout.token %></dd></div>
+      </dl>
+    </section>
+
+    <div class="flash info">After the admin approves this request, the item will appear in My Library and you can download it immediately.</div>
+
+    <div class="button-row">
+      <a class="button primary" href="/library">My Library</a>
+      <% if (product) { %>
+        <a class="button ghost" href="/products/<%= product.id %>">Back to product</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

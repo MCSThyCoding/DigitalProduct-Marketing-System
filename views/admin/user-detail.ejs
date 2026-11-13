@@ -1,0 +1,199 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<%
+  function stars(rating) {
+    const value = Math.max(0, Math.min(5, Number(rating) || 0));
+    return '★'.repeat(value) + '☆'.repeat(5 - value);
+  }
+%>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>User details</h1>
+    <p class="muted">Inspect account information and role-specific marketplace activity.</p>
+  </div>
+  <a class="button secondary" href="/admin">Back to admin panel</a>
+</section>
+
+<section class="profile-card">
+  <div class="profile-main">
+    <div>
+      <span class="eyebrow">User #<%= account.id %></span>
+      <h2><%= account.name %></h2>
+      <p class="muted"><%= account.email %></p>
+    </div>
+    <div class="profile-badges">
+      <span class="badge"><%= account.role %></span>
+      <span class="badge <%= account.status === 'active' ? '' : 'warning' %>"><%= account.status %></span>
+    </div>
+  </div>
+
+  <dl class="profile-meta">
+    <div><dt>User ID</dt><dd><%= account.id %></dd></div>
+    <div><dt>Email</dt><dd><%= account.email %></dd></div>
+    <div><dt>Role</dt><dd><%= account.role %></dd></div>
+    <div><dt>Status</dt><dd><%= account.status %></dd></div>
+    <div><dt>Member since</dt><dd><%= formatDate(account.created_at) %></dd></div>
+  </dl>
+
+  <% if (account.role !== 'admin' && Number(account.id) !== Number(user.id)) { %>
+    <div class="button-row profile-action">
+      <form method="POST" action="/admin/users/<%= account.id %>/toggle-status">
+        <input type="hidden" name="redirectTo" value="detail">
+        <button class="button <%= account.status === 'banned' ? 'secondary' : 'danger' %>" type="submit">
+          <%= account.status === 'banned' ? 'Unban user' : 'Ban user' %>
+        </button>
+      </form>
+      <form method="POST" action="/admin/users/<%= account.id %>/delete" onsubmit="return confirm('Delete this user account? This permanently removes the account and related marketplace data.');">
+        <button class="button danger" type="submit">Delete account</button>
+      </form>
+    </div>
+  <% } %>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card"><span>Products</span><strong><%= stats.products %></strong></div>
+  <div class="stat-card"><span>Items sold</span><strong><%= stats.itemsSold %></strong></div>
+  <div class="stat-card"><span>Gross earnings</span><strong><%= formatMoney(stats.grossEarnings) %></strong></div>
+  <div class="stat-card"><span>Purchases</span><strong><%= stats.purchases %></strong></div>
+  <div class="stat-card"><span>Total spent</span><strong><%= formatMoney(stats.totalSpent) %></strong></div>
+  <div class="stat-card"><span>Reviews</span><strong><%= stats.reviews %></strong></div>
+</section>
+
+<% if (purchases.length || account.role === 'buyer') { %>
+  <section class="panel">
+    <div class="section-heading"><h2>Purchase history</h2><span class="muted"><%= purchases.length %> orders</span></div>
+    <% if (purchases.length === 0) { %>
+      <p class="muted">This buyer has not purchased any products yet.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Order</th><th>Products</th><th>Coupon</th><th>Payment</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            <% purchases.forEach(function(order) { %>
+              <tr>
+                <td><strong>#<%= order.order_number %></strong></td>
+                <td><%= order.product_titles || `${order.item_count} item(s)` %></td>
+                <td><%= order.coupon_code || '—' %></td>
+                <td><%= order.payment_provider ? `${order.payment_provider}${order.payment_ref ? ` · ${order.payment_ref}` : ''}` : '—' %></td>
+                <td><%= formatMoney(order.subtotal_cents) %></td>
+                <td>−<%= formatMoney(order.discount_cents) %></td>
+                <td><strong><%= formatMoney(order.total_cents) %></strong></td>
+                <td><span class="badge <%= order.status === 'completed' ? '' : 'warning' %>"><%= order.status %></span></td>
+                <td><%= formatDate(order.created_at) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+<% } %>
+
+<% if (products.length || account.role === 'creator') { %>
+  <section class="panel">
+    <div class="section-heading"><h2>Products</h2><span class="muted"><%= products.length %> total · <%= stats.liveProducts %> live · <%= stats.pendingProducts %> pending</span></div>
+    <% if (products.length === 0) { %>
+      <p class="muted">This creator has not uploaded any products yet.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Product</th><th>Category</th><th>Price</th><th>Status</th><th>Sales</th><th>Earnings</th><th>File</th><th>Created</th></tr>
+          </thead>
+          <tbody>
+            <% products.forEach(function(product) { %>
+              <tr>
+                <td><strong><%= product.title %></strong></td>
+                <td><%= product.category %></td>
+                <td><%= formatMoney(product.price_cents) %></td>
+                <td><span class="badge <%= product.status === 'live' ? '' : 'warning' %>"><%= product.status %></span></td>
+                <td><%= product.sales_count %></td>
+                <td><%= formatMoney(product.earnings_cents) %></td>
+                <td><%= product.original_filename %></td>
+                <td><%= formatDate(product.created_at) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+<% } %>
+
+<% if (sales.length || account.role === 'creator') { %>
+  <section class="panel">
+    <div class="section-heading"><h2>Sales</h2><span class="muted"><%= sales.length %> sold items</span></div>
+    <% if (sales.length === 0) { %>
+      <p class="muted">This creator has not made any sales yet.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Order</th><th>Buyer</th><th>Product</th><th>Price</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            <% sales.forEach(function(sale) { %>
+              <tr>
+                <td>#<%= sale.order_number %></td>
+                <td><strong><%= sale.buyer_name %></strong><div class="muted"><%= sale.buyer_email %></div></td>
+                <td><%= sale.product_title %></td>
+                <td><%= formatMoney(sale.price_cents) %></td>
+                <td><%= formatDate(sale.created_at) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+<% } %>
+
+<% if (coupons.length || account.role === 'creator') { %>
+  <section class="panel">
+    <div class="section-heading"><h2>Coupons</h2><span class="muted"><%= coupons.length %> codes</span></div>
+    <% if (coupons.length === 0) { %>
+      <p class="muted">This creator has not created any coupon codes.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Code</th><th>Discount</th><th>Status</th><th>Created</th></tr></thead>
+          <tbody>
+            <% coupons.forEach(function(coupon) { %>
+              <tr>
+                <td><strong><%= coupon.code %></strong></td>
+                <td><%= coupon.percent_off %>% off</td>
+                <td><span class="badge <%= coupon.active ? '' : 'warning' %>"><%= coupon.active ? 'Active' : 'Inactive' %></span></td>
+                <td><%= formatDate(coupon.created_at) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </section>
+<% } %>
+
+<% if (reviews.length) { %>
+  <section class="panel">
+    <div class="section-heading"><h2>Reviews written</h2><span class="muted"><%= reviews.length %> total</span></div>
+    <div class="review-list">
+      <% reviews.forEach(function(review) { %>
+        <article class="review">
+          <div class="review-head">
+            <strong><%= review.product_title %></strong>
+            <span class="rating"><%= stars(review.rating) %></span>
+            <span class="muted"><%= formatDate(review.created_at) %></span>
+          </div>
+          <p><%= review.comment || 'No written comment.' %></p>
+        </article>
+      <% }); %>
+    </div>
+  </section>
+<% } %>
+
+<%- include('../partials/footer') %>

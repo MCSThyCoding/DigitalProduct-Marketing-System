@@ -1,0 +1,40 @@
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="<%= user ? '/products' : '/' %>">
+      <span class="brand-mark">DM</span>
+      <span>Digital Market</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <% if (user) { %>
+        <a href="/products">Browse</a>
+        <% if (user.role === 'buyer') { %>
+          <a href="/library">My Library</a>
+        <% } else if (user.role === 'creator') { %>
+          <a href="/creator">Dashboard</a>
+          <a href="/creator/coupons">Coupons</a>
+          <a href="/creator/products/new">Sell</a>
+        <% } else if (user.role === 'admin') { %>
+          <a href="/admin">Admin Panel</a>
+        <% } %>
+        <span class="user-chip"><%= user.name %> · <%= user.role %></span>
+        <form method="POST" action="/logout" class="inline-form">
+          <button class="button ghost small" type="submit">Log out</button>
+        </form>
+      <% } else { %>
+        <a href="/#signin">Sign in</a>
+        <a class="button primary small" href="/register">Create account</a>
+      <% } %>
+    </nav>
+  </div>
+</header>
+
+<% if (typeof flash !== 'undefined' && flash && flash.length) { %>
+  <div class="container flash-stack">
+    <% flash.forEach(function(item) { %>
+      <div class="flash <%= item.type %>"><%= item.message %></div>
+    <% }); %>
+  </div>
+<% } %>
+
+<main class="container page">

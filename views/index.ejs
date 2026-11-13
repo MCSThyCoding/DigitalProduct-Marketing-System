@@ -1,0 +1,36 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="auth-page">
+  <div class="hero-copy">
+    <p class="eyebrow">Sell and download digital products instantly</p>
+    <h1>Upload → Buy → Instant download.</h1>
+    <p class="lede">One account, three roles. Creators publish files, buyers get secure downloads, and admins moderate the marketplace.</p>
+    <div class="hero-actions">
+      <a class="button primary" href="/register">Create account</a>
+      <a class="button secondary" href="#signin">Sign in</a>
+    </div>
+    <div class="role-preview">
+      <div><strong>Buyer</strong><span>Browse and download files</span></div>
+      <div><strong>Creator</strong><span>Upload files and earn</span></div>
+      <div><strong>Admin</strong><span>Moderate users and products</span></div>
+    </div>
+  </div>
+
+  <div class="auth-card" id="signin">
+    <h2>Sign in</h2>
+    <form method="POST" action="/login">
+      <label>Email
+        <input type="email" name="email" required autocomplete="email" placeholder="you@example.com">
+      </label>
+      <label>Password
+        <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+      </label>
+      <button class="button primary full" type="submit">Sign in</button>
+    </form>
+    <p class="muted">Demo accounts are created automatically on first run.</p>
+    <p class="auth-switch">New here? <a href="/register">Create an account</a></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

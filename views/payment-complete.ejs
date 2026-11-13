@@ -1,0 +1,27 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="checkout-layout single">
+  <div>
+    <p class="eyebrow">Card payment</p>
+    <h1>Payment complete</h1>
+    <p class="muted">The demo card payment was completed successfully.</p>
+
+    <section class="panel">
+      <dl class="summary-list">
+        <div><dt>Product</dt><dd><%= product ? product.title : `Product #${checkout.product_id}` %></dd></div>
+        <div><dt>Amount</dt><dd><%= formatMoney(checkout.total_cents) %></dd></div>
+        <div><dt>Status</dt><dd>Completed</dd></div>
+      </dl>
+    </section>
+
+    <div class="flash success">Return to the marketplace on the original device and open My Library to download the product.</div>
+
+    <div class="button-row">
+      <a class="button primary" href="/">Back to marketplace</a>
+      <a class="button ghost" href="/library">My Library</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

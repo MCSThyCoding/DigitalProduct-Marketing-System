@@ -1,0 +1,47 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<section class="form-page">
+  <div class="form-card">
+    <p class="eyebrow">Creator workspace</p>
+    <h1><%= product ? 'Edit product' : 'Upload new product' %></h1>
+    <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+
+    <form method="POST" action="<%= product ? `/creator/products/${product.id}` : '/creator/products' %>" enctype="multipart/form-data">
+      <label>Title
+        <input type="text" name="title" value="<%= values.title %>" required maxlength="120">
+      </label>
+      <label>Description
+        <textarea name="description" rows="5" required maxlength="2000"><%= values.description %></textarea>
+      </label>
+      <div class="form-row">
+        <label>Price (USD)
+          <input type="text" name="price" value="<%= values.price %>" required placeholder="19.00">
+        </label>
+        <label>Category
+          <select name="category">
+            <% categories.forEach(function(category) { %>
+              <option value="<%= category %>" <%= values.category === category ? 'selected' : '' %>><%= category %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+
+      <label>File attachment
+        <input type="file" name="file" <%= product ? '' : 'required' %>>
+        <span class="muted">PDF, ZIP, DOCX, PPTX, code, and other digital files up to 25 MB.<%= product ? ' Leave empty to keep the current file.' : '' %></span>
+      </label>
+      <% if (product) { %>
+        <p class="muted current-file"><%= fileIcon(product.original_filename) %> Current file: <%= product.original_filename %></p>
+      <% } %>
+
+      <div class="form-actions">
+        <button class="button primary" type="submit"><%= product ? 'Save changes' : 'Publish product' %></button>
+        <a class="button ghost" href="/creator">Cancel</a>
+      </div>
+    </form>
+    <p class="muted">New products are submitted as pending and go live after admin approval.</p>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

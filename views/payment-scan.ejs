@@ -1,0 +1,23 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="checkout-layout single">
+  <div>
+    <p class="eyebrow">Card payment</p>
+    <h1>Confirm payment</h1>
+    <p class="muted">Complete this simulated card payment for the product below.</p>
+
+    <section class="panel">
+      <dl class="summary-list">
+        <div><dt>Product</dt><dd><%= product ? product.title : `Product #${checkout.product_id}` %></dd></div>
+        <div><dt>Amount</dt><dd><%= formatMoney(checkout.total_cents) %></dd></div>
+        <div><dt>Status</dt><dd>Ready to pay</dd></div>
+      </dl>
+    </section>
+
+    <a class="button primary large full" href="<%= completeUrl %>">Complete payment</a>
+    <p class="muted">This is a demo payment — no real card charge is made.</p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

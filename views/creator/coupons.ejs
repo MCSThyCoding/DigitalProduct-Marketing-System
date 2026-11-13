@@ -1,0 +1,51 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Promotions</p>
+    <h1>Coupon codes</h1>
+    <p class="muted">Create simple percentage discounts for your products.</p>
+  </div>
+  <a class="button secondary" href="/creator">Back to dashboard</a>
+</section>
+
+<section class="panel coupon-panel">
+  <h2>Create coupon</h2>
+  <form class="coupon-create" method="POST" action="/creator/coupons">
+    <label>Code
+      <input type="text" name="code" required maxlength="30" placeholder="DISCOUNT20" style="text-transform:uppercase">
+    </label>
+    <label>Discount %
+      <input type="number" name="percentOff" min="1" max="100" required placeholder="20">
+    </label>
+    <button class="button primary" type="submit">Create</button>
+  </form>
+</section>
+
+<% if (coupons.length === 0) { %>
+  <div class="empty-state"><h2>No coupons yet</h2><p>Create a code like DISCOUNT20 to offer 20% off at checkout.</p></div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Code</th><th>Discount</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        <% coupons.forEach(function(coupon) { %>
+          <tr>
+            <td><strong><%= coupon.code %></strong></td>
+            <td><%= coupon.percent_off %>% off</td>
+            <td><span class="badge <%= coupon.active ? '' : 'warning' %>"><%= coupon.active ? 'Active' : 'Inactive' %></span></td>
+            <td><%= formatDate(coupon.created_at) %></td>
+            <td>
+              <form method="POST" action="/creator/coupons/<%= coupon.id %>/toggle">
+                <button class="button secondary small" type="submit"><%= coupon.active ? 'Deactivate' : 'Activate' %></button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

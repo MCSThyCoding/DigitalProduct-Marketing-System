@@ -1,0 +1,62 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="checkout-layout single">
+  <div>
+    <p class="eyebrow">Card payment</p>
+    <h1>Scan to pay</h1>
+    <p class="muted">Scan this QR code with another device on the same network to complete the demo card payment.</p>
+
+    <section class="panel qr-panel">
+      <div class="qr-code"><img src="<%= qrDataUrl %>" alt="Payment QR code"></div>
+      <dl class="summary-list">
+        <div><dt>Product</dt><dd><%= product ? product.title : `Product #${checkout.product_id}` %></dd></div>
+        <div><dt>Amount</dt><dd><%= formatMoney(checkout.total_cents) %></dd></div>
+        <div><dt>Status</dt><dd id="payment-status">Waiting for payment</dd></div>
+      </dl>
+      <p class="muted qr-link">Other device link: <%= scanUrl %></p>
+    </section>
+
+    <div class="flash info">This page checks automatically — you will get an alert as soon as the other device completes payment.</div>
+
+    <div class="button-row">
+      <a class="button primary" href="/payments/demo/success?checkout=<%= encodeURIComponent(checkout.token) %>">Check payment status</a>
+      <a class="button ghost" href="/payments/cancel?checkout=<%= encodeURIComponent(checkout.token) %>&provider=demo">Cancel payment</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const checkoutToken = <%- JSON.stringify(checkout.token) %>;
+  const checkoutProductId = <%= checkout.product_id %>;
+  const statusEl = document.getElementById('payment-status');
+  const statusUrl = '/payments/demo/status?checkout=' + encodeURIComponent(checkoutToken);
+  let finished = false;
+
+  async function checkStatus() {
+    if (finished) return;
+    try {
+      const response = await fetch(statusUrl, { headers: { Accept: 'application/json' } });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.status === 'completed') {
+        finished = true;
+        if (statusEl) statusEl.textContent = 'Completed';
+        alert('Payment completed! Your download is ready in My Library.');
+        window.location.href = '/library';
+      } else if (['failed', 'cancelled', 'duplicate'].includes(data.status)) {
+        finished = true;
+        if (statusEl) statusEl.textContent = 'Not completed';
+        alert('Payment was not completed.');
+        window.location.href = '/products/' + checkoutProductId + '/checkout';
+      }
+    } catch (_error) {
+      // Keep polling; temporary network errors should not stop the page.
+    }
+  }
+
+  checkStatus();
+  setInterval(checkStatus, 2500);
+</script>
+
+<%- include('partials/footer') %>

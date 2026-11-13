@@ -1,0 +1,41 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="auth-page narrow">
+  <div class="auth-card wide">
+    <h1>Create your account</h1>
+    <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+    <form method="POST" action="/register">
+      <label>Full name
+        <input type="text" name="name" value="<%= values.name || '' %>" required autocomplete="name">
+      </label>
+      <label>Email
+        <input type="email" name="email" value="<%= values.email || '' %>" required autocomplete="email">
+      </label>
+      <label>Password
+        <input type="password" name="password" required minlength="8" autocomplete="new-password">
+      </label>
+      <label>Confirm password
+        <input type="password" name="confirmPassword" required minlength="8" autocomplete="new-password">
+      </label>
+
+      <fieldset class="role-picker">
+        <legend>I want to…</legend>
+        <label class="role-option">
+          <input type="radio" name="role" value="buyer" <%= values.role === 'buyer' ? 'checked' : '' %> required>
+          <span><strong>Buy products</strong><small>Browse and download files</small></span>
+        </label>
+        <label class="role-option">
+          <input type="radio" name="role" value="creator" <%= values.role === 'creator' ? 'checked' : '' %> required>
+          <span><strong>Sell products</strong><small>Upload files and earn</small></span>
+        </label>
+      </fieldset>
+
+      <p class="muted">Admin accounts are created by the system owner.</p>
+      <button class="button primary full" type="submit">Create account</button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="/">Sign in</a></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,104 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="checkout-layout">
+  <div>
+    <p class="eyebrow">Secure checkout</p>
+    <h1>Confirm purchase</h1>
+    <p class="muted">After you confirm, you will be redirected to the selected payment provider to complete payment.</p>
+
+    <article class="panel product-mini">
+      <div>
+        <span class="product-icon"><%= categoryIcon(product.category) %></span>
+        <div>
+          <h2><%= product.title %></h2>
+          <p class="muted">by <%= product.creator_name %> · <%= product.category %></p>
+        </div>
+      </div>
+      <strong><%= formatMoney(product.price_cents) %></strong>
+    </article>
+
+    <section class="panel">
+      <h2>Order summary</h2>
+      <dl class="summary-list">
+        <div><dt>Product</dt><dd><%= product.title %></dd></div>
+        <div><dt>Order</dt><dd>Instant delivery</dd></div>
+        <div><dt>Date</dt><dd><%= new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></dd></div>
+        <div><dt>Subtotal</dt><dd><%= formatMoney(product.price_cents) %></dd></div>
+        <% if (coupon) { %>
+          <div><dt>Coupon</dt><dd><%= coupon.code %> (<%= coupon.percent_off %>% off)</dd></div>
+          <div><dt>Discount</dt><dd>−<%= formatMoney(discountCents) %></dd></div>
+        <% } %>
+        <div class="total-row"><dt>Total</dt><dd><%= formatMoney(totalCents) %></dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <aside class="checkout-card">
+    <h2>Payment</h2>
+    <p class="muted">Your download is released only after payment is verified.</p>
+
+    <form method="GET" action="/products/<%= product.id %>/checkout" class="coupon-form">
+      <label>Coupon code
+        <input type="text" name="coupon" value="<%= requestedCoupon || '' %>" placeholder="DISCOUNT20">
+      </label>
+      <button class="button secondary" type="submit">Apply</button>
+    </form>
+    <% if (coupon) { %>
+      <div class="flash success">Coupon <strong><%= coupon.code %></strong> applied: <%= coupon.percent_off %>% off.</div>
+    <% } else if (couponError) { %>
+      <div class="flash error"><%= couponError %></div>
+    <% } %>
+
+    <% if (paymentProviders && paymentProviders.length) { %>
+      <form method="POST" action="/products/<%= product.id %>/purchase">
+        <label>Payment method
+          <select name="paymentProvider" id="payment-provider">
+            <% paymentProviders.forEach(function(provider) { %>
+              <option value="<%= provider.id %>" <%= provider.id === defaultProvider ? 'selected' : '' %>><%= provider.label %></option>
+            <% }); %>
+          </select>
+        </label>
+        <div id="aba-payment-option" <%= defaultProvider === 'aba' ? '' : 'hidden' %>>
+          <label>ABA PayWay method
+            <select name="paymentOption">
+              <% abaPaymentOptions.forEach(function(option) { %>
+                <option value="<%= option.id %>" <%= option.id === defaultAbaPaymentOption ? 'selected' : '' %>><%= option.label %></option>
+              <% }); %>
+            </select>
+          </label>
+          <p class="muted">Choose KHQR/QR for ABA PAY or KHQR apps, or Card for Visa/Mastercard checkout.</p>
+        </div>
+        <div id="manual-payment-note" <%= defaultProvider === 'manual' ? '' : 'hidden' %>>
+          <p class="muted">Cash/manual payment is confirmed by an admin before your download is released.</p>
+        </div>
+        <div id="demo-payment-note" <%= defaultProvider === 'demo' ? '' : 'hidden' %>>
+          <p class="muted">Simulated card payment for demo — no real charge is made.</p>
+        </div>
+        <input type="hidden" name="couponCode" value="<%= coupon ? coupon.code : '' %>">
+        <button class="button primary full large" type="submit">Confirm Purchase · <%= formatMoney(totalCents) %></button>
+      </form>
+    <% } else { %>
+      <div class="flash error">No payment provider is configured. Set Stripe or ABA PayWay credentials, or enable demo mode.</div>
+    <% } %>
+    <a class="button ghost full" href="/products/<%= product.id %>">Back to product</a>
+  </aside>
+</section>
+
+<script>
+  const providerSelect = document.getElementById('payment-provider');
+  const abaOption = document.getElementById('aba-payment-option');
+  const manualNote = document.getElementById('manual-payment-note');
+  const demoNote = document.getElementById('demo-payment-note');
+  if (providerSelect && abaOption && manualNote && demoNote) {
+    function togglePaymentOptions() {
+      abaOption.hidden = providerSelect.value !== 'aba';
+      manualNote.hidden = providerSelect.value !== 'manual';
+      demoNote.hidden = providerSelect.value !== 'demo';
+    }
+    providerSelect.addEventListener('change', togglePaymentOptions);
+    togglePaymentOptions();
+  }
+</script>
+
+<%- include('partials/footer') %>

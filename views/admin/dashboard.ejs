@@ -1,0 +1,126 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>Admin panel</h1>
+    <p class="muted">Moderate users, approve products, and monitor marketplace activity.</p>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card"><span>Users</span><strong><%= stats.users %></strong></div>
+  <div class="stat-card"><span>Products</span><strong><%= stats.products %></strong></div>
+  <div class="stat-card"><span>Pending</span><strong><%= stats.pendingProducts %></strong></div>
+  <div class="stat-card"><span>Total sales</span><strong><%= stats.orders %></strong></div>
+  <div class="stat-card"><span>Revenue</span><strong><%= formatMoney(stats.revenue) %></strong></div>
+</section>
+
+<% if (manualPayments && manualPayments.length) { %>
+  <section class="panel">
+    <div class="section-heading"><h2>Manual payments</h2><span class="muted"><%= manualPayments.length %> pending</span></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Buyer</th><th>Product</th><th>Amount</th><th>Method</th><th>Requested</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% manualPayments.forEach(function(payment) { %>
+            <tr>
+              <td><strong><%= payment.buyer_name %></strong><br><span class="muted"><%= payment.buyer_email %></span></td>
+              <td><%= payment.product_title %></td>
+              <td><%= formatMoney(payment.total_cents) %></td>
+              <td><%= payment.payment_option === 'cash' ? 'Cash' : 'Manual' %></td>
+              <td><%= payment.created_at %></td>
+              <td class="actions">
+                <form method="POST" action="/admin/manual-payments/<%= payment.id %>/approve">
+                  <button class="button primary small" type="submit">Approve</button>
+                </form>
+                <form method="POST" action="/admin/manual-payments/<%= payment.id %>/reject">
+                  <button class="button danger small" type="submit">Reject</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% } %>
+
+<section class="panel">
+  <div class="section-heading"><h2>Users</h2><span class="muted"><%= users.length %> accounts</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Products</th><th>Sales</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(account) { %>
+          <tr>
+            <td><a href="/admin/users/<%= account.id %>"><strong><%= account.name %></strong></a></td>
+            <td><%= account.email %></td>
+            <td><span class="badge"><%= account.role %></span></td>
+            <td><span class="badge <%= account.status === 'active' ? '' : 'warning' %>"><%= account.status %></span></td>
+            <td><%= account.product_count %></td>
+            <td><%= account.sales_count %></td>
+            <td class="actions">
+              <a class="button secondary small" href="/admin/users/<%= account.id %>">View</a>
+              <% if (account.role !== 'admin' && Number(account.id) !== Number(user.id)) { %>
+                <form method="POST" action="/admin/users/<%= account.id %>/toggle-status">
+                  <button class="button <%= account.status === 'banned' ? 'secondary' : 'danger' %> small" type="submit">
+                    <%= account.status === 'banned' ? 'Unban' : 'Ban' %>
+                  </button>
+                </form>
+                <form method="POST" action="/admin/users/<%= account.id %>/delete" onsubmit="return confirm('Delete this user account? This permanently removes the account and related marketplace data.');">
+                  <button class="button danger small" type="submit">Delete</button>
+                </form>
+              <% } else { %>
+                <span class="muted">Protected</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-heading"><h2>Products</h2><span class="muted"><%= products.length %> items</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Product</th><th>Creator</th><th>Category</th><th>Price</th><th>Status</th><th>Sales</th><th>Earnings</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <% products.forEach(function(product) { %>
+          <tr>
+            <td><strong><%= product.title %></strong></td>
+            <td><%= product.creator_name %></td>
+            <td><%= product.category %></td>
+            <td><%= formatMoney(product.price_cents) %></td>
+            <td><span class="badge <%= product.status === 'live' ? '' : 'warning' %>"><%= product.status %></span></td>
+            <td><%= product.sales_count %></td>
+            <td><%= formatMoney(product.earnings_cents) %></td>
+            <td class="actions">
+              <% if (product.status !== 'live') { %>
+                <form method="POST" action="/admin/products/<%= product.id %>/approve">
+                  <button class="button primary small" type="submit">Approve</button>
+                </form>
+              <% } %>
+              <% if (product.status !== 'removed') { %>
+                <form method="POST" action="/admin/products/<%= product.id %>/remove">
+                  <button class="button danger small" type="submit">Remove</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

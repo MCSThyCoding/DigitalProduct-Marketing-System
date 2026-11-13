@@ -1,0 +1,61 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Buyer dashboard</p>
+    <h1>My Library</h1>
+    <p class="muted">Purchase confirmed. Your downloads are ready instantly.</p>
+  </div>
+  <a class="button secondary" href="/products">Browse products</a>
+</section>
+
+<% if (items.length === 0) { %>
+  <div class="empty-state">
+    <h2>No purchases yet</h2>
+    <p>Buy a digital product and it will appear here with a secure download link.</p>
+    <a class="button primary" href="/products">Browse products</a>
+  </div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Order</th>
+          <th>Date</th>
+          <th>Rating</th>
+          <th>File</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.forEach(function(item) { %>
+          <tr>
+            <td>
+              <strong><%= item.product_title %></strong>
+              <div class="muted">by <%= item.creator_name || 'Creator' %></div>
+            </td>
+            <td>#<%= item.order_number %></td>
+            <td><%= formatDate(item.purchased_at) %></td>
+            <td>
+              <% if (item.user_rating) { %>
+                <span class="rating"><%= '★'.repeat(item.user_rating) + '☆'.repeat(5 - item.user_rating) %></span>
+              <% } else if (item.product_id) { %>
+                <a href="/products/<%= item.product_id %>">Rate</a>
+              <% } else { %>
+                <span class="muted">—</span>
+              <% } %>
+            </td>
+            <td><%= fileIcon(item.original_filename) %> <%= item.original_filename %></td>
+            <td>
+              <a class="button primary small" href="/library/<%= item.id %>/download">Download</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
