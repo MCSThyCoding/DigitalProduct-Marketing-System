@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning server.js",
     "dev": "node --disable-warning=ExperimentalWarning --watch server.js",
-    "seed": "node --disable-warning=ExperimentalWarning -e \"require('./seed').seedIfEmpty()\""
+    "seed": "node --disable-warning=ExperimentalWarning -e \"require('./seed').seedIfEmpty()\"",
+    "jira:setup": "node jira-setup.js"
   },
   "keywords": [],
   "author": "",
