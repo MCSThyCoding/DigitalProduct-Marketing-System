@@ -1,0 +1,29 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<section class="auth-page narrow">
+  <div class="auth-card wide">
+    <h1>Check your email</h1>
+    <p class="muted">We sent a 6-digit verification code to <strong><%= email %></strong>. Enter it below to finish creating your account.</p>
+
+    <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+    <% if (message) { %><div class="flash success"><%= message %></div><% } %>
+    <% if (devCode) { %><div class="flash info">Dev mode (no SMTP configured): your code is <strong><%= devCode %></strong>. It is also printed in the server console.</div><% } %>
+
+    <form method="POST" action="/verify-email">
+      <input type="hidden" name="email" value="<%= email %>">
+      <label>Verification code
+        <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autocomplete="one-time-code" placeholder="123456">
+      </label>
+      <button class="button primary full" type="submit">Verify &amp; create account</button>
+    </form>
+
+    <form method="POST" action="/resend-otp" class="auth-switch">
+      <input type="hidden" name="email" value="<%= email %>">
+      <button class="button ghost" type="submit">Resend code</button>
+    </form>
+    <p class="auth-switch"><a href="/register">← Back to registration</a></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

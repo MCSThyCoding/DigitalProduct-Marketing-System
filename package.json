@@ -20,6 +20,7 @@
     "express-session": "^1.19.0",
     "fflate": "^0.8.3",
     "multer": "^2.5.0",
+    "nodemailer": "^10.6.0",
     "qrcode": "^1.5.4"
   }
 }

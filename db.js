@@ -103,6 +103,18 @@ db.exec(`
     UNIQUE (product_id, user_id)
   );
 
+  CREATE TABLE IF NOT EXISTS email_otps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    code_hash TEXT NOT NULL,
+    purpose TEXT NOT NULL DEFAULT 'register',
+    payload TEXT,
+    expires_at TEXT NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (email, purpose)
+  );
+
   CREATE INDEX IF NOT EXISTS idx_products_status_category ON products(status, category);
   CREATE INDEX IF NOT EXISTS idx_products_creator ON products(creator_id);
   CREATE INDEX IF NOT EXISTS idx_orders_buyer ON orders(buyer_id);
